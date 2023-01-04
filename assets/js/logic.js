@@ -9,16 +9,18 @@ var feed = document.getElementById('feedback');
 var seconds = 60
 var end = document.getElementById('end-screen');
 var finalScore = document.getElementById('final-score');
-var score = 0
 var sub = document.getElementById('submit');
-var Output = [];
-var Name = document.getElementById('initials')
-var leaderboard = [];
+var initials = document.getElementById('initials')
+var highScores = [];
+var Output = ""
+var previousOutput = [];
+var item = [];
+var newEntry = [];
+var timer;
 
 var displayQuestion = function () {
     questionIndex = questionIndex + 1
-    console.log(questionIndex, seconds)
-    if ((questionIndex === 4) || (seconds < 0)) {
+    if ((questionIndex >= queries.length) || (seconds < 0)) {
         highscore()
     } else {
 
@@ -29,7 +31,6 @@ var displayQuestion = function () {
         }
         var but = [];
         for (var i = 1; i < 5; i++) {
-            console.log(i)
             but[i] = document.createElement('button');
             but[i].id = ('button' + i);
             but[i].className += 'button';
@@ -38,7 +39,7 @@ var displayQuestion = function () {
         }
         // change question
         questiontitle.innerText = (queries[questionIndex].query);
-        setTimeout(myFunction, 10000);
+        setTimeout(myFunction, 30000);
     }
 }
 // listen for starter click, hide old data, loop to create 4 new buttons with answers from questions.js on 1st question all in same function
@@ -48,9 +49,9 @@ btn.addEventListener('click', function (event) {
     timer = setInterval(function () {
         document.getElementById('time').innerText = seconds
         seconds--;
-        if (seconds === 0) {
-            clearTimeout(timer);
-            feed.innerText("time up")
+        if (seconds < 0) {
+            clearInterval(timer);
+            document.getElementById('time').innerText = "Expired"
         }
     }, 1000);
     startpage.setAttribute('style', 'display: none;');
@@ -68,7 +69,6 @@ btn.addEventListener('click', function (event) {
 var choices = document.getElementById('choices');
 choices.addEventListener('click', function (event) {
     //document.getElementById('question-title').innerText= (queries[0].query)
-    console.log('here')
     if (event.target.innerText === queries[questionIndex].answer) {
 
         feed.innerText = 'Correct'
@@ -80,29 +80,29 @@ choices.addEventListener('click', function (event) {
     displayQuestion()
 })
 
-function myFunction(seconds) {
+function myFunction() {
 
-    feed.innerText = 'Time Up 10 seconds deducted'
-    seconds = seconds - 10
-    displayQuestion()
+    feed.innerText = ''
 }
 
 function highscore() {
+    clearInterval(timer);
     questiontitle.setAttribute('style', 'display: none;');
     choices.setAttribute('style', 'display: none;');
     end.classList.remove('hide');
     finalScore.innerText = seconds
-    score = finalScore.innerText
     document.getElementById('time').setAttribute('style', 'display: none;');
     feed.setAttribute('style', 'display: none;');
 
     sub.addEventListener('click', function (event) {
         event.stopPropagation();
-        Output = [initials.value, score]
-        console.log(Output)
-        localStorage.setItem('Output', JSON.stringify(Output));
+        var highestScores = JSON.parse(localStorage.getItem('highestScores')) || [];
+        var high = {
+            initials: initials.value,
+            score: seconds
+        }
+        highestScores.push(high)
+        localStorage.setItem('highestScores', JSON.stringify(highestScores))
         window.location = "highscores.html";
-
     })
-
 }
